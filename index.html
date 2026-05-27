@@ -1,850 +1,583 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="dark">
+<html lang="ru" data-theme="light">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MQL5 Prompt Builder</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--bg4:#2d333b;
-  --border:#30363d;--border2:#444c56;
-  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
-  --accent:#58a6ff;--accent2:#1f6feb;
-  --green:#3fb950;--green2:#238636;
-  --purple:#a371f7;--orange:#f0883e;--yellow:#d29922;--red:#f85149;
-  --radius:8px;--font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
-  --trans:180ms cubic-bezier(0.16,1,0.3,1);
-}
-[data-theme="light"]{
-  --bg:#f6f8fa;--bg2:#fff;--bg3:#f0f2f5;--bg4:#e8ecf0;
-  --border:#d0d7de;--border2:#b0bbc5;--text:#1f2328;--text2:#636c76;--text3:#9198a1;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
-button,input,textarea,select{font:inherit;}
-
-.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
-.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;}
-.logo-badge{background:linear-gradient(135deg,var(--accent2),var(--purple));color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;}
-.header-right{display:flex;align-items:center;gap:10px;}
-.btn-icon{background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--trans);}
-.btn-icon:hover{background:var(--bg4);color:var(--text);}
-
-.main{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 61px);}
-.panel-left{border-right:1px solid var(--border);overflow-y:auto;max-height:calc(100vh - 61px);}
-.panel-right{overflow-y:auto;max-height:calc(100vh - 61px);display:flex;flex-direction:column;}
-
-.panel-header{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.panel-title{font-weight:600;font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;}
-
-.form-body{padding:20px;display:flex;flex-direction:column;gap:16px;}
-.type-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;background:var(--bg3);padding:4px;border-radius:var(--radius);border:1px solid var(--border);}
-.type-tab{padding:9px 6px;border-radius:6px;cursor:pointer;transition:all var(--trans);display:flex;flex-direction:column;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text2);border:1px solid transparent;background:transparent;user-select:none;}
-.type-tab:hover{background:var(--bg4);color:var(--text);}
-.type-tab.active{background:var(--bg2);color:var(--accent);border-color:var(--border);box-shadow:0 2px 8px rgba(0,0,0,.3);}
-.tab-icon{font-size:20px;}
-
-.section-group{display:flex;flex-direction:column;gap:8px;}
-.section-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;display:flex;align-items:center;gap:6px;}
-.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
-
-.field{display:flex;flex-direction:column;gap:5px;}
-.field label{font-size:13px;color:var(--text2);font-weight:500;}
-.field input,.field textarea,.field select{background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--radius);font-size:13px;font-family:var(--font);transition:border-color var(--trans),box-shadow var(--trans),background var(--trans);outline:none;width:100%;}
-.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(31,111,235,.15);}
-.field textarea{resize:vertical;min-height:70px;}
-.field select option{background:var(--bg2);}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-
-.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.check-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);cursor:pointer;padding:6px 8px;border-radius:var(--radius);border:1px solid var(--border);transition:all var(--trans);background:var(--bg2);user-select:none;}
-.check-item:hover{border-color:var(--border2);color:var(--text);}
-.check-item.checked{border-color:var(--accent2);color:var(--accent);background:rgba(31,111,235,.08);}
-.check-item input{display:none;}
-.check-box{width:14px;height:14px;border:1.5px solid var(--border2);border-radius:3px;flex-shrink:0;transition:all var(--trans);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;}
-.check-item.checked .check-box{background:var(--accent2);border-color:var(--accent2);}
-
-.tag-group{display:flex;flex-wrap:wrap;gap:6px;}
-.tag{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--text2);transition:all var(--trans);user-select:none;}
-.tag:hover{border-color:var(--border2);color:var(--text);}
-.tag.active-tag{border-color:var(--green2);background:rgba(63,185,80,.1);color:var(--green);}
-
-.btn-generate{background:linear-gradient(135deg,var(--accent2),var(--purple));color:#fff;border:none;padding:12px 20px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;transition:all var(--trans);width:100%;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(31,111,235,.3);margin-top:4px;}
-.btn-generate:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(31,111,235,.4);}
-.btn-generate:active{transform:translateY(0);}
-
-.output-area{flex:1;display:flex;flex-direction:column;min-height:0;}
-.output-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text3);padding:40px;text-align:center;}
-.output-empty .big-icon{font-size:48px;opacity:.4;}
-.output-empty h3{font-size:15px;color:var(--text2);}
-.output-empty p{font-size:13px;max-width:28ch;}
-
-.output-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 20px;background:var(--bg2);}
-.output-tab{padding:10px 16px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:var(--text2);border-bottom:2px solid transparent;transition:all var(--trans);}
-.output-tab:hover{color:var(--text);}
-.output-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
-
-.tab-pane{display:none;flex:1;flex-direction:column;overflow-y:auto;min-height:0;}
-.tab-pane.active{display:flex;}
-.prompt-box{flex:1;padding:20px;font-family:var(--mono);font-size:12.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;color:var(--text);}
-.copy-btn-bar{padding:10px 20px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;flex-shrink:0;}
-.btn-copy{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;cursor:pointer;transition:all var(--trans);display:flex;align-items:center;gap:6px;}
-.btn-copy:hover{background:var(--bg4);}
-.btn-copy.copied{border-color:var(--green2);color:var(--green);background:rgba(63,185,80,.08);}
-.btn-copy.warn{border-color:var(--yellow);color:var(--yellow);background:rgba(210,153,34,.08);}
-
-.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
-.badge-ea{background:rgba(163,113,247,.15);color:var(--purple);}
-.badge-ind{background:rgba(88,166,255,.15);color:var(--accent);}
-.badge-scr{background:rgba(63,185,80,.15);color:var(--green);}
-
-.template-grid{padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.template-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;cursor:pointer;transition:all var(--trans);}
-.template-card:hover{border-color:var(--accent2);transform:translateY(-1px);}
-.tc-tag{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--accent);margin-bottom:4px;}
-.tc-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
-.tc-desc{font-size:11px;color:var(--text3);}
-
-.tips-list{padding:16px;display:flex;flex-direction:column;gap:8px;}
-.tip-card{background:var(--bg2);border:1px solid var(--border);border-left:3px solid;border-radius:var(--radius);padding:12px 14px;}
-.tip-card.tip-blue{border-left-color:var(--accent);}
-.tip-card.tip-green{border-left-color:var(--green);}
-.tip-card.tip-orange{border-left-color:var(--orange);}
-.tip-card.tip-purple{border-left-color:var(--purple);}
-.tip-title{font-size:12px;font-weight:700;margin-bottom:4px;}
-.tip-text{font-size:12px;color:var(--text2);line-height:1.5;}
-
-.toast{position:fixed;right:16px;bottom:16px;z-index:200;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);color:var(--text);box-shadow:0 10px 30px rgba(0,0,0,.25);font-size:12px;max-width:320px;transform:translateY(12px);opacity:0;pointer-events:none;transition:all var(--trans);}
-.toast.show{transform:translateY(0);opacity:1;}
-.toast.success{border-color:var(--green2);}
-.toast.warn{border-color:var(--yellow);}
-.toast.error{border-color:var(--red);}
-
-.hidden{display:none !important;}
-
-::-webkit-scrollbar{width:5px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
-
-@media(max-width:768px){
-  .main{grid-template-columns:1fr;}
-  .panel-left{max-height:none;border-right:none;border-bottom:1px solid var(--border);}
-  .panel-right{max-height:80vh;}
-  .row2,.row3,.template-grid,.check-grid{grid-template-columns:1fr;}
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mql5-prompt-builder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --surface-2: #eef2ff;
+      --text: #101828;
+      --muted: #667085;
+      --line: #dbe1ea;
+      --primary: #2563eb;
+      --primary-2: #1d4ed8;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+    [data-theme="dark"] {
+      --bg: #0b1020;
+      --surface: #121a2b;
+      --surface-2: #0f172a;
+      --text: #edf2f7;
+      --muted: #94a3b8;
+      --line: #22304a;
+      --primary: #60a5fa;
+      --primary-2: #3b82f6;
+      --success: #22c55e;
+      --danger: #f87171;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: linear-gradient(180deg, var(--bg), color-mix(in srgb, var(--bg) 80%, #c7d2fe 20%));
+      color: var(--text);
+    }
+    .wrap { max-width: 1440px; margin: 0 auto; padding: 28px; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .brand h1 { margin: 0; font: 800 clamp(28px, 4vw, 42px)/1.05 Manrope, sans-serif; }
+    .brand p { margin: 10px 0 0; color: var(--muted); max-width: 780px; }
+    .top-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      border: 1px solid var(--line); background: var(--surface); color: var(--text);
+      padding: 12px 16px; border-radius: 14px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow);
+    }
+    .btn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: white; border-color: transparent; }
+    .layout { display: grid; grid-template-columns: 320px 1fr 420px; gap: 20px; align-items: start; }
+    .panel {
+      background: color-mix(in srgb, var(--surface) 92%, transparent 8%);
+      border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+      padding: 18px;
+      backdrop-filter: blur(10px);
+    }
+    .panel h2 { margin: 0 0 14px; font-size: 18px; }
+    .stack { display: grid; gap: 14px; }
+    .tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .tab {
+      padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); cursor: pointer; font-weight: 700;
+    }
+    .tab.active { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border-color: transparent; }
+    .field { display: grid; gap: 8px; }
+    .field label { font-size: 13px; font-weight: 700; color: var(--muted); }
+    .field input, .field textarea, .field select {
+      width: 100%; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: var(--surface); color: var(--text);
+      resize: vertical; min-height: 46px;
+    }
+    .field textarea { min-height: 92px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .checklist { display: grid; gap: 10px; }
+    .check {
+      display: flex; gap: 10px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface);
+    }
+    .check input { margin-top: 3px; }
+    .section-title {
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 6px 0 2px;
+    }
+    .hint { color: var(--muted); font-size: 13px; }
+    .template-list { display: grid; gap: 10px; }
+    .template-btn {
+      width: 100%; text-align: left; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); cursor: pointer;
+    }
+    .template-btn strong { display:block; margin-bottom:4px; }
+    .output {
+      min-height: 760px; white-space: pre-wrap; line-height: 1.5; font-size: 14px;
+      background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, #dbeafe 6%), var(--surface));
+      border: 1px solid var(--line); border-radius: 18px; padding: 18px; overflow: auto;
+    }
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px; }
+    .badge {
+      display:inline-flex; align-items:center; gap:8px; font-size:12px; padding:8px 10px; border-radius:999px; background: var(--surface-2); color: var(--muted); border:1px solid var(--line);
+    }
+    .tips { display:grid; gap:10px; }
+    .tip { padding: 12px; border-radius: 14px; background: var(--surface); border:1px solid var(--line); }
+    .status { font-size: 13px; color: var(--muted); min-height: 20px; }
+    .hidden { display:none !important; }
+    @media (max-width: 1200px) { .layout { grid-template-columns: 1fr; } .output{min-height:420px;} }
+  </style>
 </head>
 <body>
-<header class="header">
-  <div class="logo">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-    MQL5 Prompt Builder
-    <span class="logo-badge">Pro</span>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>MQL5 Prompt Builder Pro</h1>
+        <p>Полнофункциональный генератор профессиональных промптов для создания стратегий, советников, индикаторов и скриптов под MetaTrader 5 на MQL5. Вводишь параметры — получаешь готовый универсальный промпт для ChatGPT, Claude, DeepSeek или MetaEditor AI Assistant.</p>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="themeToggle">Сменить тему</button>
+        <button class="btn" id="fillDemo">Демо-данные</button>
+        <button class="btn primary" id="generateTop">Сгенерировать промпт</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="panel stack">
+        <div>
+          <h2>Режим</h2>
+          <div class="tabs" id="modeTabs">
+            <button class="tab active" data-mode="ea">Советник</button>
+            <button class="tab" data-mode="indicator">Индикатор</button>
+            <button class="tab" data-mode="script">Скрипт</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title"><h2>Шаблоны</h2><span class="hint">Клик — и форма заполнится</span></div>
+          <div class="template-list" id="templateList"></div>
+        </div>
+
+        <div>
+          <h2>Советы</h2>
+          <div class="tips">
+            <div class="tip">Пиши правила входа и выхода отдельно — это резко повышает качество кода.</div>
+            <div class="tip">Всегда проси: полный код, комментарии, список input-параметров и инструкцию по установке.</div>
+            <div class="tip">После генерации проси вторым сообщением: «проверь код на ошибки компиляции и логические дыры».</div>
+            <div class="tip">Для EA добавляй ограничения: одна позиция на символ, Magic Number, запрет повторного входа в том же баре.</div>
+          </div>
+        </div>
+      </aside>
+
+      <main class="panel stack">
+        <div class="grid-2">
+          <div class="field"><label>Название проекта / файла</label><input id="projectName" placeholder="Например: EMA_RSI_EA" /></div>
+          <div class="field"><label>Роль ИИ</label><input id="aiRole" value="Ты senior MQL5 developer, quantitative trader и code reviewer" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Символ</label><input id="symbol" placeholder="EURUSD" /></div>
+          <div class="field"><label>Таймфрейм</label><input id="timeframe" placeholder="M15 / H1 / H4" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Рынок / контекст</label><input id="marketContext" placeholder="Forex, intraday, London/NY session" /></div>
+          <div class="field"><label>Стиль стратегии</label><input id="strategyStyle" placeholder="trend-following / mean-reversion / breakout" /></div>
+        </div>
+
+        <div class="field"><label>Описание стратегии / задачи</label><textarea id="strategyDescription" placeholder="Коротко опиши идею стратегии или задачи"></textarea></div>
+
+        <div id="eaFields" class="stack mode-fields">
+          <div class="field"><label>Условия входа Long</label><textarea id="entryLong" placeholder="Например: EMA 20 пересекает EMA 50 снизу вверх, RSI > 55, свеча закрылась выше EMA 20"></textarea></div>
+          <div class="field"><label>Условия входа Short</label><textarea id="entryShort" placeholder="Например: EMA 20 пересекает EMA 50 сверху вниз, RSI < 45, свеча закрылась ниже EMA 20"></textarea></div>
+          <div class="field"><label>Фильтры</label><textarea id="filters" placeholder="Время торговли, ATR, спред, новости, одна сделка на бар, одна позиция на символ"></textarea></div>
+          <div class="field"><label>Условия выхода</label><textarea id="exitRules" placeholder="TP/SL, противоположный сигнал, трейлинг, безубыток, закрытие по времени"></textarea></div>
+        </div>
+
+        <div id="indicatorFields" class="stack mode-fields hidden">
+          <div class="field"><label>Что должен показывать индикатор</label><textarea id="indicatorPurpose" placeholder="Например: тренд, сигналы стрелками, фон по волатильности, гистограмма импульса"></textarea></div>
+          <div class="field"><label>Логика расчёта</label><textarea id="indicatorLogic" placeholder="Какие формулы, какие буферы, какие линии, цвета, условия сигналов"></textarea></div>
+          <div class="field"><label>Отрисовка и алерты</label><textarea id="indicatorVisuals" placeholder="Стрелки, линии, гистограмма, пуш/алерт, подписи"></textarea></div>
+        </div>
+
+        <div id="scriptFields" class="stack mode-fields hidden">
+          <div class="field"><label>Назначение скрипта</label><textarea id="scriptPurpose" placeholder="Например: закрыть все позиции, выгрузить сделки в CSV, поставить уровни, рассчитать риск"></textarea></div>
+          <div class="field"><label>Логика работы</label><textarea id="scriptLogic" placeholder="Что скрипт делает шаг за шагом"></textarea></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field"><label>Тип лота</label>
+            <select id="lotType">
+              <option value="fixed">Fixed lot</option>
+              <option value="risk_percent">Risk % per trade</option>
+              <option value="auto">Auto calculate</option>
+            </select>
+          </div>
+          <div class="field"><label>Magic Number</label><input id="magicNumber" placeholder="20260527" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Stop Loss</label><input id="stopLoss" placeholder="Например: 300 points / ATR*1.5" /></div>
+          <div class="field"><label>Take Profit</label><input id="takeProfit" placeholder="Например: RR 1:2 / 600 points" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Trailing / BE</label><input id="trailing" placeholder="Например: BE at +200, trail 150 points" /></div>
+          <div class="field"><label>Особые ограничения</label><input id="constraints" placeholder="Например: не открывать более 1 сделки в день" /></div>
+        </div>
+
+        <div>
+          <div class="section-title"><h2>Что обязательно включить в ответ ИИ</h2><span class="hint">Можно включать/отключать</span></div>
+          <div class="checklist">
+            <label class="check"><input type="checkbox" id="needFullCode" checked> <span>Полный готовый код без заглушек</span></label>
+            <label class="check"><input type="checkbox" id="needInputs" checked> <span>Все параметры оформить как <code>input</code></span></label>
+            <label class="check"><input type="checkbox" id="needComments" checked> <span>Добавить понятные комментарии в коде</span></label>
+            <label class="check"><input type="checkbox" id="needInstall" checked> <span>Инструкция по установке и запуску в MT5</span></label>
+            <label class="check"><input type="checkbox" id="needCompileCheck" checked> <span>Проверка на ошибки компиляции и типичные баги</span></label>
+            <label class="check"><input type="checkbox" id="needTesterGuide" checked> <span>Шаги для проверки в Strategy Tester</span></label>
+            <label class="check"><input type="checkbox" id="needImprovements"> <span>Список идей по улучшению версии 2.0</span></label>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn primary" id="generateBtn">Сгенерировать промпт</button>
+          <button class="btn" id="copyBtn">Копировать промпт</button>
+          <button class="btn" id="downloadBtn">Скачать .txt</button>
+          <button class="btn" id="clearBtn">Очистить форму</button>
+        </div>
+        <div class="status" id="status">Готово к работе.</div>
+      </main>
+
+      <section class="panel">
+        <div class="section-title"><h2>Результат</h2><span class="badge" id="modeBadge">Режим: Советник</span></div>
+        <div class="output" id="output">Нажми «Сгенерировать промпт», чтобы получить полностью собранный профессиональный промпт.</div>
+      </section>
+    </div>
   </div>
-  <div class="header-right">
-    <button class="btn-icon" id="theme-btn" title="Сменить тему" type="button">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-    </button>
-    <button class="btn-icon" id="reset-btn" title="Сбросить" type="button">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
-    </button>
-  </div>
-</header>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const state = { mode: 'ea' };
 
-<main class="main">
-  <section class="panel-left">
-    <div class="panel-header">
-      <span class="panel-title">Конструктор промпта</span>
-    </div>
-    <div class="form-body">
-      <div class="section-group">
-        <div class="section-label">Тип инструмента</div>
-        <div class="type-tabs" id="type-tabs">
-          <button type="button" class="type-tab active" data-type="ea"><span class="tab-icon">🤖</span>Советник (EA)</button>
-          <button type="button" class="type-tab" data-type="ind"><span class="tab-icon">📈</span>Индикатор</button>
-          <button type="button" class="type-tab" data-type="scr"><span class="tab-icon">⚡</span>Скрипт</button>
-        </div>
-      </div>
-
-      <div class="section-group">
-        <div class="section-label">Базовые настройки</div>
-        <div class="field">
-          <label for="fname">Название файла</label>
-          <input id="fname" type="text" value="MyEA_v1" placeholder="Например: TrendFollower_EA">
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label for="symbol">Инструмент</label>
-            <select id="symbol">
-              <option>Любой (универсальный)</option>
-              <option>EURUSD</option>
-              <option>GBPUSD</option>
-              <option>USDJPY</option>
-              <option>XAUUSD (Gold)</option>
-              <option>BTCUSD</option>
-              <option>Фьючерсы</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="tf">Таймфрейм</label>
-            <select id="tf">
-              <option>M5</option>
-              <option>M15</option>
-              <option selected>H1</option>
-              <option>H4</option>
-              <option>D1</option>
-              <option>Несколько ТФ</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-group">
-        <div class="section-label">Логика стратегии</div>
-        <div class="field">
-          <label id="lbl-entry-long" for="entry_long">Условие входа LONG</label>
-          <textarea id="entry_long" placeholder="Например: EMA(9) пересекает EMA(21) снизу вверх + RSI(14) > 50"></textarea>
-        </div>
-        <div class="field" id="entry-short-wrap">
-          <label for="entry_short">Условие входа SHORT</label>
-          <textarea id="entry_short" placeholder="Например: EMA(9) пересекает EMA(21) сверху вниз + RSI(14) < 50"></textarea>
-        </div>
-        <div class="field">
-          <label id="lbl-filters" for="filters">Фильтры (необязательно)</label>
-          <textarea id="filters" placeholder="Например: торговать только в сессию Лондон, ADX > 25"></textarea>
-        </div>
-        <div class="field">
-          <label id="lbl-exit" for="exit_cond">Условие выхода / закрытия</label>
-          <textarea id="exit_cond" placeholder="Например: обратный сигнал, трейлинг 20 пп, закрытие по EMA"></textarea>
-        </div>
-      </div>
-
-      <div class="section-group" id="risk_block">
-        <div class="section-label">Риск-менеджмент</div>
-        <div class="row3">
-          <div class="field">
-            <label for="lot_type">Тип лота</label>
-            <select id="lot_type">
-              <option>% от депозита</option>
-              <option>Фиксированный лот</option>
-              <option>ATR-based</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="lot_val">Значение</label>
-            <input id="lot_val" type="text" placeholder="1% / 0.01">
-          </div>
-          <div class="field">
-            <label for="magic">Magic Number</label>
-            <input id="magic" type="text" value="12345">
-          </div>
-        </div>
-        <div class="row2">
-          <div class="field"><label for="sl">Stop Loss</label><input id="sl" type="text" placeholder="50 пп / ATR*1.5"></div>
-          <div class="field"><label for="tp">Take Profit</label><input id="tp" type="text" placeholder="100 пп / SL*2"></div>
-        </div>
-        <div class="field">
-          <label for="trail">Трейлинг / Безубыток</label>
-          <input id="trail" type="text" placeholder="Безубыток при +30 пп, трейлинг 20 пп">
-        </div>
-        <div class="field">
-          <label for="extra_risk">Дополнительные ограничения</label>
-          <input id="extra_risk" type="text" placeholder="Макс просадка 5%, макс 3 сделки в день">
-        </div>
-      </div>
-
-      <div class="section-group">
-        <div class="section-label">Дополнительные опции</div>
-        <div class="check-grid">
-          <label class="check-item" id="ck-comment"><input type="checkbox"><span class="check-box"></span>Комментарии к коду</label>
-          <label class="check-item" id="ck-input"><input type="checkbox"><span class="check-box"></span>Input-параметры</label>
-          <label class="check-item" id="ck-log"><input type="checkbox"><span class="check-box"></span>Логирование Print()</label>
-          <label class="check-item" id="ck-alert"><input type="checkbox"><span class="check-box"></span>Alert / Push-уведомления</label>
-          <label class="check-item" id="ck-panel"><input type="checkbox"><span class="check-box"></span>Визуальная панель</label>
-          <label class="check-item" id="ck-multi"><input type="checkbox"><span class="check-box"></span>Мультивалютный режим</label>
-          <label class="check-item" id="ck-test"><input type="checkbox"><span class="check-box"></span>Тест-кейсы</label>
-          <label class="check-item" id="ck-explain"><input type="checkbox"><span class="check-box"></span>Объяснить функции</label>
-        </div>
-      </div>
-
-      <div class="section-group">
-        <div class="section-label">Уровень опыта</div>
-        <div class="tag-group" id="level-tags">
-          <button type="button" class="tag active-tag">🌱 Новичок</button>
-          <button type="button" class="tag">⚙️ Средний</button>
-          <button type="button" class="tag">🚀 Продвинутый</button>
-        </div>
-      </div>
-
-      <div class="section-group">
-        <div class="section-label">Язык ответа ИИ</div>
-        <div class="tag-group" id="lang-tags">
-          <button type="button" class="tag active-tag">🇷🇺 Русский</button>
-          <button type="button" class="tag">🇬🇧 English</button>
-        </div>
-      </div>
-
-      <div class="section-group">
-        <div class="section-label">Дополнительный контекст</div>
-        <div class="field">
-          <label for="extra_ctx">Что ещё важно</label>
-          <textarea id="extra_ctx" placeholder="Например: нужно добавить функцию X, совместить с существующим кодом..."></textarea>
-        </div>
-      </div>
-
-      <button class="btn-generate" id="gen-btn" type="button">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Сгенерировать промпт
-      </button>
-    </div>
-  </section>
-
-  <section class="panel-right">
-    <div class="panel-header">
-      <span class="panel-title">Промпт / Шаблоны / Советы</span>
-      <span class="badge badge-ea" id="type-badge">EA</span>
-    </div>
-    <div class="output-area">
-      <div class="output-tabs">
-        <button type="button" class="output-tab active" data-tab="prompt">📄 Промпт</button>
-        <button type="button" class="output-tab" data-tab="templates">📚 Шаблоны</button>
-        <button type="button" class="output-tab" data-tab="tips">💡 Советы</button>
-      </div>
-
-      <div class="tab-pane active" id="tab-prompt">
-        <div class="output-empty" id="empty-state">
-          <div class="big-icon">✨</div>
-          <h3>Промпт ещё не создан</h3>
-          <p>Заполните параметры слева и нажмите «Сгенерировать»</p>
-        </div>
-        <div id="prompt-result" class="hidden" style="flex:1;flex-direction:column;min-height:0;">
-          <div class="prompt-box" id="prompt-text"></div>
-          <div class="copy-btn-bar">
-            <button class="btn-copy" id="copy-btn" type="button">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              Копировать промпт
-            </button>
-            <button class="btn-copy" id="select-btn" type="button">Выделить текст</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="tab-pane" id="tab-templates">
-        <div class="template-grid" id="template-grid"></div>
-      </div>
-
-      <div class="tab-pane" id="tab-tips">
-        <div class="tips-list">
-          <div class="tip-card tip-blue"><div class="tip-title">🎯 Точность = качество кода</div><div class="tip-text">Вместо «трендовая стратегия» пишите конкретно: «EMA(9) > EMA(21), RSI(14) > 50, ATR(14) > 0.0015». Чем точнее условия — тем лучше код.</div></div>
-          <div class="tip-card tip-green"><div class="tip-title">🔄 Итерации — норма</div><div class="tip-text">Первый код всегда черновик. Просите ИИ объяснить логику и предложить улучшения: «Что можно улучшить в этом советнике?»</div></div>
-          <div class="tip-card tip-orange"><div class="tip-title">🧪 Просите тест-кейсы</div><div class="tip-text">После кода добавьте: «Напиши 5 ситуаций, где логика EA может дать неожиданный результат.»</div></div>
-          <div class="tip-card tip-purple"><div class="tip-title">⚙️ Разбивайте сложное</div><div class="tip-text">Не просите весь советник сразу. Сначала — логику входа, затем риск, затем трейлинг. Потом объедините.</div></div>
-          <div class="tip-card tip-blue"><div class="tip-title">🛡️ Обработка ошибок</div><div class="tip-text">Добавьте в промпт: «Добавь обработку ошибок OrderSend, защиту от двойного открытия, проверку торговых условий.»</div></div>
-          <div class="tip-card tip-green"><div class="tip-title">📊 MetaEditor AI Assistant</div><div class="tip-text">Встроенный ИИ прямо в MetaEditor 5. Выделите код → правая кнопка → Ask AI. Удобно для объяснений и исправлений.</div></div>
-          <div class="tip-card tip-orange"><div class="tip-title">🔎 Буферы для индикаторов</div><div class="tip-text">Для индикаторов указывайте: количество буферов, что рисовать (линия / гистограмма / стрелки), цвета и стиль отрисовки.</div></div>
-          <div class="tip-card tip-purple"><div class="tip-title">💾 Сохраняйте промпты</div><div class="tip-text">Ведите личную библиотеку промптов в Notion или Obsidian. Удачные промпты — ваш растущий актив.</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<div id="toast" class="toast" aria-live="polite"></div>
-
-<script>
-(function () {
-  'use strict';
-
-  const state = {
-    currentType: 'ea',
-    rawText: '',
-    defaultFileByType: {
-      ea: 'MyEA_v1',
-      ind: 'MyIndicator_v1',
-      scr: 'MyScript_v1'
-    }
-  };
-
-  const $ = (id) => document.getElementById(id);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  const els = {
-    html: document.documentElement,
-    typeTabs: $$('#type-tabs .type-tab'),
-    outputTabs: $$('.output-tab'),
-    levelTags: $$('#level-tags .tag'),
-    langTags: $$('#lang-tags .tag'),
-    checkItems: $$('.check-item'),
-    riskBlock: $('risk_block'),
-    entryShortWrap: $('entry-short-wrap'),
-    lblEntryLong: $('lbl-entry-long'),
-    lblFilters: $('lbl-filters'),
-    lblExit: $('lbl-exit'),
-    typeBadge: $('type-badge'),
-    emptyState: $('empty-state'),
-    promptResult: $('prompt-result'),
-    promptText: $('prompt-text'),
-    genBtn: $('gen-btn'),
-    copyBtn: $('copy-btn'),
-    selectBtn: $('select-btn'),
-    resetBtn: $('reset-btn'),
-    themeBtn: $('theme-btn'),
-    templateGrid: $('template-grid'),
-    toast: $('toast')
-  };
-
-  const templates = {
-    ea: [
-      { name: 'EMA Crossover', desc: 'EMA(9)/EMA(21), SL=ATR*1.5, TP=ATR*3', tag: 'Трендовый', entry: 'EMA(9) пересекает EMA(21) снизу вверх на закрытии бара. RSI(14) > 50. Свеча бычья (close > open).', short: 'EMA(9) пересекает EMA(21) сверху вниз. RSI(14) < 50. Свеча медвежья.', sl: 'ATR(14) x 1.5', tp: 'SL x 2', lot: '1% от депозита' },
-      { name: 'RSI Mean Reversion', desc: 'Возврат к среднему RSI < 30 / > 70', tag: 'Контртренд', entry: 'RSI(14) опускается ниже 25 и разворачивается вверх (предыдущий бар ниже 25, текущий выше).', short: 'RSI(14) поднимается выше 75 и разворачивается вниз.', sl: '50 пунктов', tp: 'SL x 2', lot: '1% от депозита' },
-      { name: 'Bollinger Breakout', desc: 'Пробой полос Bollinger + объём', tag: 'Пробойный', entry: 'Цена закрывается выше верхней полосы Bollinger(20,2). ATR(14) выше среднего ATR за 20 баров.', short: 'Цена закрывается ниже нижней полосы Bollinger(20,2).', sl: 'ATR(14) x 2', tp: 'ATR(14) x 3', lot: '0.5% от депозита' },
-      { name: 'MACD + Stochastic', desc: 'MACD > сигнал + Stoch не перекуплен', tag: 'Комбо', entry: 'MACD(12,26,9) пересекает сигнальную линию снизу вверх + Stochastic(14,3,3) < 80.', short: 'MACD пересекает сигнальную линию сверху вниз + Stochastic > 20.', sl: '40 пунктов', tp: '80 пунктов', lot: '1% от депозита' },
-      { name: 'Price Action Pins', desc: 'Пин-бар на H4 + уровень S/R', tag: 'Price Action', entry: 'Бычий пин-бар на H4: нижняя тень в 2+ раза длиннее тела, тело в верхней трети бара, формируется на уровне поддержки.', short: 'Медвежий пин-бар: верхняя тень в 2+ раза длиннее тела, на уровне сопротивления.', sl: 'Ниже хвоста пин-бара + 10 пп', tp: 'SL x 2', lot: '1% от депозита' },
-      { name: 'Grid Trading EA', desc: 'Сетка ордеров с шагом по ATR', tag: 'Сеточный', entry: 'Открывать buy-ордера каждые ATR(14) пунктов вниз от текущей цены. Максимум 5 уровней.', short: 'Открывать sell-ордера каждые ATR(14) пунктов вверх. Максимум 5 уровней.', sl: 'Нет (управление позицией через суммарный TP)', tp: 'ATR(14) x 0.5 на каждый ордер', lot: '0.01 (фиксированный)' }
-    ],
-    ind: [
-      { name: 'Trend Strength', desc: 'Гистограмма силы тренда по ADX+EMA', tag: 'Тренд', entry: 'Рассчитать силу тренда: (EMA(9) - EMA(21)) / ATR(14). Отображать гистограммой в отдельном окне. Зелёный — восходящий тренд, красный — нисходящий.' },
-      { name: 'Signal Arrows', desc: 'Стрелки buy/sell по MA-кроссу', tag: 'Сигнальный', entry: 'Рисовать стрелку вверх (синяя) когда EMA(9) пересекает EMA(21) снизу вверх. Стрелку вниз (красная) при обратном пересечении. Стрелки на баре пересечения.' },
-      { name: 'Session Boxes', desc: 'Прямоугольники торговых сессий', tag: 'Визуал', entry: 'Рисовать прямоугольники для сессий: Азия (00:00-09:00 GMT) — синий, Лондон (08:00-17:00 GMT) — зелёный, Нью-Йорк (13:00-22:00 GMT) — оранжевый. Прозрачность 80%.' },
-      { name: 'Multi-TF RSI', desc: 'RSI на 3 таймфреймах в одном окне', tag: 'Мульти-ТФ', entry: 'Отображать три линии RSI(14) в одном подокне: текущий ТФ (белая), H1 (синяя), H4 (жёлтая). Уровни 30 и 70 пунктирными линиями. Input-параметры: все три ТФ и периоды.' }
-    ],
-    scr: [
-      { name: 'Close All Positions', desc: 'Закрыть все открытые позиции', tag: 'Управление', entry: 'Закрыть все открытые позиции по рыночной цене. Перед закрытием вывести в журнал: символ, тип, объём, прибыль. После — итоговую прибыль/убыток.' },
-      { name: 'Export Deals CSV', desc: 'Выгрузить историю сделок в CSV', tag: 'Аналитика', entry: 'Выгрузить историю сделок из MT5 за последние 90 дней в файл deals_history.csv. Колонки: дата, символ, тип, объём, цена входа, цена выхода, прибыль, комментарий.' },
-      { name: 'Set SL/TP Batch', desc: 'Поставить SL и TP всем ордерам', tag: 'Управление', entry: 'Поставить Stop Loss и Take Profit всем открытым позициям без SL/TP. SL = ATR(14) x 1.5 от цены открытия. TP = SL x 2. Input-параметры: множитель ATR для SL и RR-ratio.' },
-      { name: 'Draw S/R Levels', desc: 'Нанести уровни поддержки/сопротивления', tag: 'Визуал', entry: 'Найти и нанести на график 5 ключевых уровней поддержки и 5 уровней сопротивления за последние 200 баров. Критерий: цена касалась уровня 3+ раза. Горизонтальные линии с подписями.' }
-    ]
-  };
-
-  function showToast(message, type = 'success') {
-    els.toast.textContent = message;
-    els.toast.className = 'toast ' + type + ' show';
-    clearTimeout(showToast._timer);
-    showToast._timer = setTimeout(() => {
-      els.toast.className = 'toast';
-    }, 2500);
-  }
-
-  function getValue(id) {
-    const el = $(id);
-    return el ? el.value.trim() : '';
-  }
-
-  function setValue(id, value) {
-    const el = $(id);
-    if (el) el.value = value;
-  }
-
-  function sanitizeFileName(name) {
-    return (name || '')
-      .replace(/[^a-zA-Z0-9_\-]/g, '_')
-      .replace(/_+/g, '_')
-      .replace(/^_+|_+$/g, '') || state.defaultFileByType[state.currentType];
-  }
-
-  function setActiveTag(groupEls, clicked) {
-    groupEls.forEach(tag => tag.classList.remove('active-tag'));
-    clicked.classList.add('active-tag');
-  }
-
-  function getActiveTagText(selector) {
-    const el = document.querySelector(selector + ' .active-tag');
-    if (!el) return '';
-    return el.textContent.replace(/[🌱⚙️🚀🇷🇺🇬🇧]/g, '').trim();
-  }
-
-  function updateTypeUI() {
-    const map = {
-      ea: {
-        badgeClass: 'badge badge-ea', badgeText: 'EA',
-        entryLong: 'Условие входа LONG', filters: 'Фильтры (необязательно)', exit: 'Условие выхода / закрытия', showRisk: true, showShort: true
-      },
-      ind: {
-        badgeClass: 'badge badge-ind', badgeText: 'Indicator',
-        entryLong: 'Что рассчитывать и отображать', filters: 'Параметры расчёта', exit: 'Визуализация (цвета, линии, стрелки)', showRisk: false, showShort: false
-      },
-      scr: {
-        badgeClass: 'badge badge-scr', badgeText: 'Script',
-        entryLong: 'Задача скрипта (что делает при запуске)', filters: 'Дополнительные условия', exit: 'Ожидаемый результат', showRisk: false, showShort: false
-      }
+    const templates = {
+      ea: [
+        {
+          name: 'EMA + RSI Trend',
+          desc: 'Классический трендовый советник с EMA-пересечением и фильтром RSI',
+          data: {
+            projectName: 'EMA_RSI_Trend_EA', symbol: 'EURUSD', timeframe: 'M15', marketContext: 'Forex intraday, London + New York', strategyStyle: 'trend-following',
+            strategyDescription: 'Советник ищет трендовое движение по пересечению EMA и фильтрует входы по RSI, избегая флэта.',
+            entryLong: 'EMA 20 пересекает EMA 50 снизу вверх; RSI(14) > 55; текущая свеча закрылась выше EMA 20.',
+            entryShort: 'EMA 20 пересекает EMA 50 сверху вниз; RSI(14) < 45; текущая свеча закрылась ниже EMA 20.',
+            filters: 'Только 07:00–19:00 terminal time; спред не выше заданного; одна позиция на символ; не более одного входа на бар.',
+            exitRules: 'Stop Loss 300 points; Take Profit 600 points; перенос в безубыток при +250 points; trailing 150 points.',
+            lotType: 'risk_percent', magicNumber: '25052701', stopLoss: '300 points', takeProfit: '600 points', trailing: 'BE +250, trailing 150', constraints: 'Одна позиция на символ.'
+          }
+        },
+        {
+          name: 'London Breakout',
+          desc: 'Пробой диапазона азиатской сессии',
+          data: {
+            projectName: 'London_Breakout_EA', symbol: 'GBPUSD', timeframe: 'M15', marketContext: 'Forex session breakout', strategyStyle: 'breakout',
+            strategyDescription: 'Советник определяет диапазон азиатской сессии и торгует пробой в сторону импульса во время Лондона.',
+            entryLong: 'Buy Stop выше high азиатского диапазона на X points после открытия Лондона.',
+            entryShort: 'Sell Stop ниже low азиатского диапазона на X points после открытия Лондона.',
+            filters: 'Только одна сделка в день; не торговать в пятницу после 16:00; контроль спреда.',
+            exitRules: 'Фиксированный SL за противоположной границей диапазона; TP = 1.5–2R; удаление отложек в конце дня.',
+            lotType: 'risk_percent', magicNumber: '25052702', stopLoss: 'За границей диапазона', takeProfit: '1.8R', trailing: 'Нет', constraints: 'Одна сделка в день.'
+          }
+        },
+        {
+          name: 'RSI Mean Reversion',
+          desc: 'Возврат к среднему с RSI и Bollinger Bands',
+          data: {
+            projectName: 'RSI_MR_EA', symbol: 'XAUUSD', timeframe: 'M5', marketContext: 'Intraday mean reversion', strategyStyle: 'mean-reversion',
+            strategyDescription: 'Логика возврата цены к средней после экстремального отклонения.',
+            entryLong: 'Цена закрылась ниже нижней полосы Bollinger; RSI < 25; следующая свеча показывает разворот.',
+            entryShort: 'Цена закрылась выше верхней полосы Bollinger; RSI > 75; следующая свеча показывает разворот.',
+            filters: 'Не торговать на новостях; ATR не ниже порога; ограничение по времени.',
+            exitRules: 'Выход по средней линии Bollinger либо по TP/SL; можно закрывать по противоположному сигналу.',
+            lotType: 'fixed', magicNumber: '25052703', stopLoss: '250 points', takeProfit: 'До средней линии / 400 points', trailing: 'Нет', constraints: 'Максимум 2 сделки за сессию.'
+          }
+        }
+      ],
+      indicator: [
+        {
+          name: 'Trend Heatmap',
+          desc: 'Многоцветный индикатор силы тренда',
+          data: {
+            projectName: 'Trend_Heatmap', symbol: 'EURUSD', timeframe: 'H1', marketContext: 'Trend analysis', strategyStyle: 'indicator',
+            strategyDescription: 'Индикатор визуализирует силу тренда и направление.',
+            indicatorPurpose: 'Показывать силу и направление тренда в виде цветной гистограммы и стрелок разворота.',
+            indicatorLogic: 'Использовать EMA fast/slow, ADX и slope основной EMA; сила сигнала от 0 до 100.',
+            indicatorVisuals: 'Гистограмма в отдельном окне; зелёный/красный цвет; алерт при смене направления; стрелки на графике.'
+          }
+        },
+        {
+          name: 'Session Range Marker',
+          desc: 'Маркировка диапазона сессий и уровней пробоя',
+          data: {
+            projectName: 'Session_Range_Marker', symbol: 'GBPUSD', timeframe: 'M15', marketContext: 'Session analysis', strategyStyle: 'indicator',
+            strategyDescription: 'Индикатор рисует диапазоны сессий и возможные уровни пробоя.',
+            indicatorPurpose: 'Автоматически отмечать high/low азиатской, лондонской и американской сессий.',
+            indicatorLogic: 'Считать high/low по заданным временным окнам и строить горизонтальные уровни.',
+            indicatorVisuals: 'Цветные прямоугольники сессий, линии high/low, подписи, алерты при пробое.'
+          }
+        }
+      ],
+      script: [
+        {
+          name: 'Close All Positions',
+          desc: 'Скрипт закрытия всех позиций и удаления ордеров',
+          data: {
+            projectName: 'Close_All_Positions', symbol: 'ALL', timeframe: 'Any', marketContext: 'Risk control utility', strategyStyle: 'script',
+            strategyDescription: 'Служебный скрипт для экстренного выхода из рынка.',
+            scriptPurpose: 'Закрыть все открытые позиции и удалить все отложенные ордера по всем символам или только по текущему символу.',
+            scriptLogic: 'Перебрать позиции и ордера; обработать ошибки; вывести лог результата; сделать подтверждение через input.'
+          }
+        },
+        {
+          name: 'Export Deals to CSV',
+          desc: 'Выгрузка истории сделок для анализа',
+          data: {
+            projectName: 'Export_Deals_CSV', symbol: 'ALL', timeframe: 'Any', marketContext: 'Analytics utility', strategyStyle: 'script',
+            strategyDescription: 'Подготовка данных для Excel/Python/Power BI.',
+            scriptPurpose: 'Экспортировать историю сделок за выбранный период в CSV.',
+            scriptLogic: 'Считать историю, отфильтровать по датам и символу, сформировать CSV с ключевыми полями, сохранить в Files.'
+          }
+        }
+      ]
     };
 
-    const cfg = map[state.currentType];
-    els.typeBadge.className = cfg.badgeClass;
-    els.typeBadge.textContent = cfg.badgeText;
-    els.lblEntryLong.textContent = cfg.entryLong;
-    els.lblFilters.textContent = cfg.filters;
-    els.lblExit.textContent = cfg.exit;
-    els.riskBlock.classList.toggle('hidden', !cfg.showRisk);
-    els.entryShortWrap.classList.toggle('hidden', !cfg.showShort);
-
-    const currentFile = $('fname').value.trim();
-    if (!currentFile || currentFile === state.defaultFileByType.ea || currentFile === state.defaultFileByType.ind || currentFile === state.defaultFileByType.scr) {
-      $('fname').value = state.defaultFileByType[state.currentType];
-    }
-  }
-
-  function activateOutputTab(name) {
-    els.outputTabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tab === name));
-    $$('.tab-pane').forEach(pane => pane.classList.toggle('active', pane.id === 'tab-' + name));
-  }
-
-  function renderTemplates() {
-    const list = templates[state.currentType] || [];
-    els.templateGrid.innerHTML = list.map((t, i) => `
-      <div class="template-card" data-idx="${i}">
-        <div class="tc-tag">${t.tag}</div>
-        <div class="tc-name">${t.name}</div>
-        <div class="tc-desc">${t.desc}</div>
-      </div>
-    `).join('');
-
-    $$('.template-card', els.templateGrid).forEach(card => {
-      card.addEventListener('click', () => {
-        const t = list[Number(card.dataset.idx)];
-        if (!t) return;
-        setValue('fname', sanitizeFileName(t.name));
-        setValue('entry_long', t.entry || '');
-        setValue('entry_short', t.short || '');
-        setValue('sl', t.sl || '');
-        setValue('tp', t.tp || '');
-        setValue('lot_val', t.lot || '');
-        activateOutputTab('prompt');
-        showToast('Шаблон подставлен', 'success');
+    function renderTemplates() {
+      const box = $('templateList');
+      box.innerHTML = '';
+      templates[state.mode].forEach((tpl, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'template-btn';
+        btn.type = 'button';
+        btn.innerHTML = `<strong>${tpl.name}</strong><span>${tpl.desc}</span>`;
+        btn.addEventListener('click', () => applyTemplate(state.mode, idx));
+        box.appendChild(btn);
       });
-    });
-  }
-
-  function collectOptions() {
-    const options = [];
-    if ($('ck-comment').classList.contains('checked')) options.push('• Добавь развёрнутые комментарии к каждому блоку кода');
-    if ($('ck-input').classList.contains('checked')) options.push('• Все ключевые параметры должны быть в секции input');
-    if ($('ck-log').classList.contains('checked')) options.push('• Добавь Print()-логи: при открытии/закрытии сделки, срабатывании фильтров');
-    if ($('ck-alert').classList.contains('checked')) options.push('• Добавь Alert() и SendNotification() при сигналах');
-    if ($('ck-panel').classList.contains('checked')) options.push('• Отрисуй информационную панель на графике: сигнал, баланс, позиции');
-    if ($('ck-multi').classList.contains('checked')) options.push('• Реализуй мультивалютный режим — проверка символа инструмента');
-    if ($('ck-test').classList.contains('checked')) options.push('• В конце предложи 5 тест-кейсов: ситуации где логика может дать сбой');
-    if ($('ck-explain').classList.contains('checked')) options.push('• После кода объясни каждую ключевую функцию простыми словами');
-    return options;
-  }
-
-  function generatePrompt() {
-    const fname = sanitizeFileName(getValue('fname'));
-    setValue('fname', fname);
-
-    const symbol = getValue('symbol');
-    const tf = getValue('tf');
-    const entryL = getValue('entry_long');
-    const entryS = getValue('entry_short');
-    const filters = getValue('filters');
-    const exitC = getValue('exit_cond');
-    const extraCtx = getValue('extra_ctx');
-    const level = getActiveTagText('#level-tags');
-    const lang = getActiveTagText('#lang-tags');
-
-    if (!entryL) {
-      activateOutputTab('prompt');
-      showToast('Заполни главное описание логики, чтобы собрать промпт', 'warn');
-      $('entry_long').focus();
-      return;
     }
 
-    const typeLabel = state.currentType === 'ea' ? 'Советник (Expert Advisor)' : state.currentType === 'ind' ? 'Индикатор' : 'Скрипт';
-    const typeFile = state.currentType === 'ea' ? '.mq5 — Expert Advisor' : state.currentType === 'ind' ? '.mq5 — Indicator' : '.mq5 — Script (однократный запуск)';
-
-    const lines = [];
-    lines.push('╔══════════════════════════════════════════════════════╗');
-    lines.push('║           РОЛЬ ИИ И КОНТЕКСТ ЗАДАЧИ                 ║');
-    lines.push('╚══════════════════════════════════════════════════════╝');
-    lines.push('');
-    lines.push('Ты — профессиональный MQL5-разработчик с опытом работы в MetaTrader 5,');
-    lines.push('специалист по алготрейдингу на рынке форекс, CFD и биржевых инструментов.');
-    lines.push('Ты отлично знаешь:');
-    lines.push('  • Структуру MQL5: OnInit(), OnDeinit(), OnTick(), OnCalculate(), OnStart()');
-    lines.push('  • Стандартные библиотеки: Trade.mqh, PositionInfo.mqh, SymbolInfo.mqh');
-    lines.push('  • Управление позициями через CTrade');
-    lines.push('  • Strategy Tester: параметры, оптимизацию, логи');
-    lines.push('  • Обработку ошибок: GetLastError(), ResetLastError()');
-    lines.push('');
-    lines.push('╔══════════════════════════════════════════════════════╗');
-    lines.push('║                     ЗАДАЧА                          ║');
-    lines.push('╚══════════════════════════════════════════════════════╝');
-    lines.push('');
-    lines.push('Тип инструмента:   ' + typeLabel);
-    lines.push('Тип файла:         ' + typeFile);
-    lines.push('Имя файла:         ' + fname + '.mq5');
-    lines.push('Инструмент:        ' + symbol);
-    lines.push('Таймфрейм:         ' + tf);
-    lines.push('Уровень ответа:    ' + level);
-    lines.push('Язык комментариев: ' + lang);
-    lines.push('');
-    lines.push('╔══════════════════════════════════════════════════════╗');
-    lines.push('║                ОСНОВНАЯ ЛОГИКА                      ║');
-    lines.push('╚══════════════════════════════════════════════════════╝');
-    lines.push('');
-
-    if (state.currentType === 'ea') {
-      lines.push('📈 СИГНАЛ LONG (покупка):');
-      lines.push(entryL);
-      lines.push('');
-      lines.push('📉 СИГНАЛ SHORT (продажа):');
-      lines.push(entryS || '[ если SHORT не нужен, реализуй только LONG-логику ]');
-      lines.push('');
-      if (filters) { lines.push('🔎 ФИЛЬТРЫ И ДОПОЛНИТЕЛЬНЫЕ УСЛОВИЯ:'); lines.push(filters); lines.push(''); }
-      if (exitC) { lines.push('🚪 УСЛОВИЕ ЗАКРЫТИЯ ПОЗИЦИИ:'); lines.push(exitC); lines.push(''); }
-    } else if (state.currentType === 'ind') {
-      lines.push('📊 ЧТО РАССЧИТЫВАЕТ И ОТОБРАЖАЕТ ИНДИКАТОР:');
-      lines.push(entryL);
-      lines.push('');
-      if (filters) { lines.push('⚙️ ПАРАМЕТРЫ РАСЧЁТА:'); lines.push(filters); lines.push(''); }
-      if (exitC) { lines.push('🎨 ВИЗУАЛИЗАЦИЯ (цвета, линии, стрелки):'); lines.push(exitC); lines.push(''); }
-    } else {
-      lines.push('⚡ ЗАДАЧА СКРИПТА (что делает при запуске):');
-      lines.push(entryL);
-      lines.push('');
-      if (filters) { lines.push('⚙️ ДОПОЛНИТЕЛЬНЫЕ УСЛОВИЯ:'); lines.push(filters); lines.push(''); }
-      if (exitC) { lines.push('📤 ОЖИДАЕМЫЙ РЕЗУЛЬТАТ:'); lines.push(exitC); lines.push(''); }
+    function setMode(mode) {
+      state.mode = mode;
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
+      $('eaFields').classList.toggle('hidden', mode !== 'ea');
+      $('indicatorFields').classList.toggle('hidden', mode !== 'indicator');
+      $('scriptFields').classList.toggle('hidden', mode !== 'script');
+      const modeMap = { ea: 'Советник', indicator: 'Индикатор', script: 'Скрипт' };
+      $('modeBadge').textContent = 'Режим: ' + modeMap[mode];
+      renderTemplates();
+      setStatus('Переключен режим: ' + modeMap[mode]);
     }
 
-    if (state.currentType === 'ea') {
-      const lotType = getValue('lot_type');
-      const lotVal = getValue('lot_val');
-      const magic = getValue('magic') || '12345';
-      const sl = getValue('sl');
-      const tp = getValue('tp');
-      const trail = getValue('trail');
-      const extraRisk = getValue('extra_risk');
-
-      lines.push('╔══════════════════════════════════════════════════════╗');
-      lines.push('║               РИСК-МЕНЕДЖМЕНТ                       ║');
-      lines.push('╚══════════════════════════════════════════════════════╝');
-      lines.push('');
-      lines.push('💰 Расчёт объёма:  ' + lotType + (lotVal ? ' = ' + lotVal : ''));
-      lines.push('🎯 Stop Loss:      ' + (sl || 'не указан — предложи разумную схему'));
-      lines.push('🎯 Take Profit:    ' + (tp || 'не указан — предложи разумную схему'));
-      lines.push('🔢 Magic Number:   ' + magic);
-      if (trail) lines.push('📍 Трейлинг:       ' + trail);
-      if (extraRisk) lines.push('⛔ Ограничения:    ' + extraRisk);
-      lines.push('');
+    function setStatus(text) {
+      $('status').textContent = text;
     }
 
-    const opts = collectOptions();
-    if (opts.length) {
-      lines.push('╔══════════════════════════════════════════════════════╗');
-      lines.push('║           ДОПОЛНИТЕЛЬНЫЕ ТРЕБОВАНИЯ                 ║');
-      lines.push('╚══════════════════════════════════════════════════════╝');
-      lines.push('');
-      opts.forEach(item => lines.push(item));
-      lines.push('');
+    function setValue(id, value) {
+      const el = $(id);
+      if (el) el.value = value ?? '';
     }
 
-    lines.push('╔══════════════════════════════════════════════════════╗');
-    lines.push('║           ТЕХНИЧЕСКИЕ ТРЕБОВАНИЯ                    ║');
-    lines.push('╚══════════════════════════════════════════════════════╝');
-    lines.push('');
-    lines.push('✅ Код компилируется без ошибок и предупреждений в MetaEditor 5');
-    lines.push('✅ Использовать стандартные библиотеки MQL5, где это уместно');
-    lines.push('✅ Для торговых операций использовать современный подход CTrade');
-    lines.push('✅ Проверять торговые условия, ошибки и граничные сценарии');
-    lines.push('✅ Избегать дублирующих открытий и логических конфликтов');
-    lines.push('✅ Код должен быть структурным, чистым и пригодным для доработки');
-    lines.push('✅ Все важные параметры должны быть понятны и легко настраиваться');
-    lines.push('');
-
-    if (extraCtx) {
-      lines.push('╔══════════════════════════════════════════════════════╗');
-      lines.push('║             ДОПОЛНИТЕЛЬНЫЙ КОНТЕКСТ                 ║');
-      lines.push('╚══════════════════════════════════════════════════════╝');
-      lines.push('');
-      lines.push(extraCtx);
-      lines.push('');
+    function applyTemplate(mode, idx) {
+      const tpl = templates[mode][idx];
+      if (!tpl) return;
+      Object.entries(tpl.data).forEach(([key, value]) => setValue(key, value));
+      setStatus('Шаблон «' + tpl.name + '» загружен.');
+      generatePrompt();
     }
 
-    lines.push('╔══════════════════════════════════════════════════════╗');
-    lines.push('║                ФОРМАТ ОТВЕТА                        ║');
-    lines.push('╚══════════════════════════════════════════════════════╝');
-    lines.push('');
-    lines.push('1. Сначала кратко (2–4 предложения) опиши логику реализации');
-    lines.push('2. Дай полный, готовый к компиляции MQL5-код в одном блоке кода');
-    lines.push('3. После кода перечисли input-параметры, которые стоит оптимизировать');
-    if ($('ck-explain').classList.contains('checked')) lines.push('4. Объясни ключевые функции простыми словами');
-    if ($('ck-test').classList.contains('checked')) lines.push('5. Дай 5 тест-кейсов для проверки логики');
-    lines.push('');
-    lines.push('Если что-то в задаче неясно — сначала задай уточняющие вопросы, а не придумывай детали самостоятельно.');
-
-    state.rawText = lines.join('\n');
-    els.promptText.textContent = state.rawText;
-    els.emptyState.classList.add('hidden');
-    els.promptResult.classList.remove('hidden');
-    els.promptResult.style.display = 'flex';
-    activateOutputTab('prompt');
-    showToast('Промпт собран', 'success');
-  }
-
-  async function copyPrompt() {
-    if (!state.rawText) {
-      showToast('Сначала сгенерируй промпт', 'warn');
-      return;
+    function collectChecklist() {
+      const items = [];
+      if ($('needFullCode').checked) items.push('Напиши полный готовый код без заглушек и псевдокода.');
+      if ($('needInputs').checked) items.push('Все настраиваемые параметры вынеси в input-переменные с понятными именами и значениями по умолчанию.');
+      if ($('needComments').checked) items.push('Добавь понятные комментарии в коде, чтобы было легко сопровождать проект.');
+      if ($('needInstall').checked) items.push('После кода дай пошаговую инструкцию, как установить, скомпилировать и запустить это в MetaTrader 5.');
+      if ($('needCompileCheck').checked) items.push('Проверь решение на типичные ошибки компиляции и логические баги MQL5 перед финальным ответом.');
+      if ($('needTesterGuide').checked) items.push('Дай короткий сценарий тестирования в Strategy Tester: какие параметры проверить и на что смотреть в отчёте.');
+      if ($('needImprovements').checked) items.push('В конце предложи список улучшений для версии 2.0.');
+      return items;
     }
 
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(state.rawText);
-        indicateCopied('copied');
+    function safe(val, fallback = 'Не указано') {
+      return (val && String(val).trim()) ? String(val).trim() : fallback;
+    }
+
+    function buildBaseHeader() {
+      return [
+        'Ты должен выступить как ' + safe($('aiRole').value) + '.',
+        'Твоя задача — спроектировать и написать качественное решение для MetaTrader 5 на языке MQL5.',
+        'Важно: код должен быть профессиональным, структурированным, пригодным к компиляции и дальнейшему развитию.',
+        '',
+        'ОБЩИЙ КОНТЕКСТ ПРОЕКТА:',
+        '- Название проекта / файла: ' + safe($('projectName').value),
+        '- Инструмент / символ: ' + safe($('symbol').value),
+        '- Таймфрейм: ' + safe($('timeframe').value),
+        '- Рыночный контекст: ' + safe($('marketContext').value),
+        '- Стиль стратегии / тип логики: ' + safe($('strategyStyle').value),
+        '- Базовое описание: ' + safe($('strategyDescription').value),
+        ''
+      ].join('\n');
+    }
+
+    function buildEA() {
+      return [
+        buildBaseHeader(),
+        'НУЖНО СОЗДАТЬ: экспертный советник (Expert Advisor) для MT5.',
+        '',
+        'ТОРГОВАЯ ЛОГИКА:',
+        '- Условия входа в Long: ' + safe($('entryLong').value),
+        '- Условия входа в Short: ' + safe($('entryShort').value),
+        '- Фильтры входа: ' + safe($('filters').value),
+        '- Условия выхода: ' + safe($('exitRules').value),
+        '',
+        'РИСК-МЕНЕДЖМЕНТ И УПРАВЛЕНИЕ ПОЗИЦИЕЙ:',
+        '- Тип расчёта лота: ' + safe($('lotType').value),
+        '- Stop Loss: ' + safe($('stopLoss').value),
+        '- Take Profit: ' + safe($('takeProfit').value),
+        '- Trailing / Break Even: ' + safe($('trailing').value),
+        '- Magic Number: ' + safe($('magicNumber').value),
+        '- Дополнительные ограничения: ' + safe($('constraints').value),
+        '',
+        'ТРЕБОВАНИЯ К АРХИТЕКТУРЕ EA:',
+        '- Используй современный стиль MQL5 с понятной структурой.',
+        '- Раздели логику на функции: получение сигналов, проверка фильтров, открытие позиции, сопровождение позиции, логирование.',
+        '- Учитывай, что советник должен корректно работать на одном символе и одном таймфрейме, если не указано иначе.',
+        '- Исключи повторное открытие одинаковых сделок без причины.',
+        '- Учитывай обработку ошибок торговых операций.',
+        '',
+        'ЧТО НУЖНО ВЫДАТЬ В ОТВЕТЕ:',
+        ...collectChecklist().map(x => '- ' + x),
+        '',
+        'ФОРМАТ ОТВЕТА:',
+        '1) Кратко опиши логику решения.',
+        '2) Затем дай полный код файла .mq5.',
+        '3) Потом укажи пояснения по ключевым блокам.',
+        '4) Затем дай инструкцию по запуску и тестированию.',
+        '5) В конце перечисли возможные улучшения и риски логики.',
+        '',
+        'Если какие-то детали стратегии неоднозначны, сначала предложи наиболее профессиональную реализацию по умолчанию и явно обозначь это в комментариях к коду.'
+      ].join('\n');
+    }
+    function buildIndicator() {
+      return [
+        buildBaseHeader(),
+        'НУЖНО СОЗДАТЬ: пользовательский индикатор (Custom Indicator) для MT5.',
+        '',
+        'НАЗНАЧЕНИЕ ИНДИКАТОРА:',
+        '- Что должен показывать: ' + safe($('indicatorPurpose').value),
+        '- Логика расчёта: ' + safe($('indicatorLogic').value),
+        '- Визуализация и алерты: ' + safe($('indicatorVisuals').value),
+        '',
+        'ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ:',
+        '- Используй корректные буферы индикатора, SetIndexBuffer, PlotIndexSet..., где это уместно.',
+        '- Логику расчётов раздели на понятные блоки.',
+        '- Обеспечь стабильную отрисовку без перерисовки там, где это критично.',
+        '- Добавь input-параметры для всех основных настроек.',
+        '',
+        'ЧТО НУЖНО ВЫДАТЬ В ОТВЕТЕ:',
+        ...collectChecklist().map(x => '- ' + x),
+        '',
+        'ФОРМАТ ОТВЕТА:',
+        '1) Краткое описание логики и математической идеи.',
+        '2) Полный код индикатора .mq5.',
+        '3) Пояснение по буферам, сигналам и настройкам.',
+        '4) Инструкция по установке и использованию.',
+        '',
+        'Если есть несколько вариантов визуализации, выбери наиболее практичный для трейдера и объясни выбор.'
+      ].join('\n');
+    }
+
+    function buildScript() {
+      return [
+        buildBaseHeader(),
+        'НУЖНО СОЗДАТЬ: скрипт (Script) для MT5.',
+        '',
+        'НАЗНАЧЕНИЕ СКРИПТА:',
+        '- Цель: ' + safe($('scriptPurpose').value),
+        '- Логика работы: ' + safe($('scriptLogic').value),
+        '',
+        'ТРЕБОВАНИЯ К РЕАЛИЗАЦИИ:',
+        '- Скрипт должен безопасно отрабатывать один запуск и завершаться корректно.',
+        '- Нужна обработка типичных ошибок и понятный лог результата.',
+        '- Все важные опции должны быть вынесены в input-параметры.',
+        '',
+        'ЧТО НУЖНО ВЫДАТЬ В ОТВЕТЕ:',
+        ...collectChecklist().map(x => '- ' + x),
+        '',
+        'ФОРМАТ ОТВЕТА:',
+        '1) Кратко опиши, что делает скрипт.',
+        '2) Дай полный код .mq5.',
+        '3) Объясни, как использовать скрипт и какие меры предосторожности нужны.',
+        '',
+        'Пиши код так, чтобы его можно было легко доработать в дальнейшем.'
+      ].join('\n');
+    }
+
+    function generatePrompt() {
+      let prompt = '';
+      if (state.mode === 'ea') prompt = buildEA();
+      if (state.mode === 'indicator') prompt = buildIndicator();
+      if (state.mode === 'script') prompt = buildScript();
+      $('output').textContent = prompt;
+      setStatus('Промпт сгенерирован.');
+      return prompt;
+    }
+
+    function copyPrompt() {
+      const text = $('output').textContent.trim();
+      if (!text || text.startsWith('Нажми')) {
+        setStatus('Сначала сгенерируй промпт.');
         return;
       }
-      throw new Error('clipboard unavailable');
-    } catch (_) {
-      const success = fallbackCopy(state.rawText);
-      if (success) {
-        indicateCopied('copied');
-      } else {
-        selectPromptText();
-        indicateCopied('warn');
-        showToast('Автокопирование заблокировано. Текст выделен — нажми Ctrl+C', 'warn');
+      navigator.clipboard.writeText(text).then(() => {
+        setStatus('Промпт скопирован в буфер обмена.');
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        setStatus('Промпт скопирован (fallback-режим).');
+      });
+    }
+
+    function downloadPrompt() {
+      const text = $('output').textContent.trim();
+      if (!text || text.startsWith('Нажми')) {
+        setStatus('Сначала сгенерируй промпт.');
+        return;
       }
+      const fileName = (safe($('projectName').value, 'mql5_prompt').replace(/[^a-zA-Z0-9_\\-]+/g, '_') || 'mql5_prompt') + '.txt';
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(a.href);
+      setStatus('TXT-файл скачан.');
     }
-  }
 
-  function fallbackCopy(text) {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', 'readonly');
-    ta.style.position = 'fixed';
-    ta.style.top = '-9999px';
-    ta.style.left = '-9999px';
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    ta.setSelectionRange(0, ta.value.length);
-    let success = false;
-    try {
-      success = document.execCommand('copy');
-    } catch (_) {
-      success = false;
+    function clearForm() {
+      document.querySelectorAll('input[type="text"], input:not([type]), textarea').forEach(el => el.value = '');
+      $('aiRole').value = 'Ты senior MQL5 developer, quantitative trader и code reviewer';
+      $('lotType').value = 'fixed';
+      $('needFullCode').checked = true;
+      $('needInputs').checked = true;
+      $('needComments').checked = true;
+      $('needInstall').checked = true;
+      $('needCompileCheck').checked = true;
+      $('needTesterGuide').checked = true;
+      $('needImprovements').checked = false;
+      $('output').textContent = 'Форма очищена. Нажми «Сгенерировать промпт», чтобы собрать новый.';
+      setStatus('Форма очищена.');
     }
-    document.body.removeChild(ta);
-    return success;
-  }
 
-  function selectPromptText() {
-    if (!state.rawText) return;
-    const range = document.createRange();
-    range.selectNodeContents(els.promptText);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    activateOutputTab('prompt');
-    showToast('Текст выделен', 'success');
-  }
-
-  function indicateCopied(mode) {
-    els.copyBtn.classList.remove('copied', 'warn');
-    els.copyBtn.classList.add(mode);
-    els.copyBtn.innerHTML = mode === 'copied' ? '✓ Скопировано!' : '⚠ Выделено для копии';
-    setTimeout(() => {
-      els.copyBtn.classList.remove('copied', 'warn');
-      els.copyBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Копировать промпт';
-    }, 2200);
-  }
-
-  function resetForm() {
-    ['entry_long','entry_short','filters','exit_cond','extra_ctx','lot_val','sl','tp','trail','extra_risk'].forEach(id => setValue(id, ''));
-    setValue('magic', '12345');
-    setValue('fname', state.defaultFileByType[state.currentType]);
-    els.checkItems.forEach(item => {
-      item.classList.remove('checked');
-      const cb = item.querySelector('input');
-      const box = item.querySelector('.check-box');
-      if (cb) cb.checked = false;
-      if (box) box.textContent = '';
-    });
-    state.rawText = '';
-    els.promptText.textContent = '';
-    els.promptResult.classList.add('hidden');
-    els.promptResult.style.display = 'none';
-    els.emptyState.classList.remove('hidden');
-    activateOutputTab('prompt');
-    preloadExamples();
-    showToast('Форма сброшена', 'success');
-  }
-
-  function toggleTheme() {
-    els.html.setAttribute('data-theme', els.html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-  }
-
-  function preloadExamples() {
-    if (state.currentType === 'ea') {
-      setValue('entry_long', 'EMA(9) пересекает EMA(21) снизу вверх на закрытии бара + RSI(14) > 50 + свеча бычья (close > open)');
-      setValue('entry_short', 'EMA(9) пересекает EMA(21) сверху вниз на закрытии бара + RSI(14) < 50 + свеча медвежья');
-      setValue('sl', 'ATR(14) × 1.5');
-      setValue('tp', 'SL × 2 (RR = 1:2)');
-      setValue('lot_val', '1% от депозита');
-      setValue('trail', 'Безубыток при +30 пп, трейлинг 20 пп');
-    } else if (state.currentType === 'ind') {
-      setValue('entry_long', 'Рассчитать силу тренда на базе EMA(9), EMA(21) и ATR(14), вывести цветную гистограмму в отдельном окне');
-      setValue('entry_short', '');
-      setValue('filters', 'Input-параметры для периодов EMA и ATR, возможность включать/выключать сигнальные метки');
-      setValue('exit_cond', 'Зелёный цвет при восходящем импульсе, красный при нисходящем, серый при флэте');
-    } else {
-      setValue('entry_long', 'При запуске скрипта закрыть все позиции по текущему символу и вывести итог в журнал');
-      setValue('entry_short', '');
-      setValue('filters', 'Не закрывать позиции с магиком 777; перед закрытием запросить подтверждение через input-параметр');
-      setValue('exit_cond', 'После выполнения вывести количество закрытых позиций и суммарный результат');
+    function fillDemo() {
+      setMode('ea');
+      applyTemplate('ea', 0);
+      setStatus('Демо-данные подставлены.');
     }
-  }
 
-  function initEvents() {
-    els.typeTabs.forEach(btn => {
-      btn.addEventListener('click', () => {
-        els.typeTabs.forEach(tab => tab.classList.remove('active'));
-        btn.classList.add('active');
-        state.currentType = btn.dataset.type;
-        updateTypeUI();
-        renderTemplates();
-        preloadExamples();
+    function toggleTheme() {
+      const root = document.documentElement;
+      root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      setStatus('Тема переключена на ' + (root.dataset.theme === 'dark' ? 'dark' : 'light') + '.');
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('#modeTabs .tab').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.dataset.mode));
       });
-    });
+      $('generateBtn').addEventListener('click', generatePrompt);
+      $('generateTop').addEventListener('click', generatePrompt);
+      $('copyBtn').addEventListener('click', copyPrompt);
+      $('downloadBtn').addEventListener('click', downloadPrompt);
+      $('clearBtn').addEventListener('click', clearForm);
+      $('fillDemo').addEventListener('click', fillDemo);
+      $('themeToggle').addEventListener('click', toggleTheme);
+    }
 
-    els.outputTabs.forEach(tab => {
-      tab.addEventListener('click', () => activateOutputTab(tab.dataset.tab));
-    });
-
-    els.levelTags.forEach(tag => tag.addEventListener('click', () => setActiveTag(els.levelTags, tag)));
-    els.langTags.forEach(tag => tag.addEventListener('click', () => setActiveTag(els.langTags, tag)));
-
-    els.checkItems.forEach(item => {
-      item.addEventListener('click', () => {
-        item.classList.toggle('checked');
-        const cb = item.querySelector('input');
-        const box = item.querySelector('.check-box');
-        const checked = item.classList.contains('checked');
-        if (cb) cb.checked = checked;
-        if (box) box.textContent = checked ? '✓' : '';
-      });
-    });
-
-    els.genBtn.addEventListener('click', generatePrompt);
-    els.copyBtn.addEventListener('click', copyPrompt);
-    els.selectBtn.addEventListener('click', selectPromptText);
-    els.resetBtn.addEventListener('click', resetForm);
-    els.themeBtn.addEventListener('click', toggleTheme);
-  }
-
-  function init() {
-    initEvents();
-    updateTypeUI();
+    bindEvents();
     renderTemplates();
-    preloadExamples();
-  }
-
-  init();
-})();
-</script>
+  </script>
 </body>
-</html>
+</html>    
